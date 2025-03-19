@@ -1,4 +1,5 @@
 import requests
+import pygal
 while True:
     symbol = input("Stock Data Visualizer\n---------------------\n\nEnter the Stock Symbol you are searching for or type EXIT to leave the program: ")
     if symbol == "EXIT":
