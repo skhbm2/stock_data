@@ -1,0 +1,148 @@
+##INFO TECH 4430 - Software Engineering
+#Project 3 - Stock Data Visualization
+#Scrum Team 2 - Sam Herrmann (Scrum Master), Zoey Benedict, Karson Null, Ken Kreidell
+
+# Resources
+# AlphaVantage API Key:   H1514RX61K8J6SFK
+# https://www.alphavantage.co/documentation/    (API to get stock info)
+# https://requests.readthedocs.io/en/latest/    (code to call API)
+# https://www.pygal.org/en/stable/documentation/types/index.html    (graphing tool)
+# https://lxml.de/  (tool to create HTML to wrap graph)
+import requests
+import pygal
+import webbrowser
+import os
+from datetime import datetime
+
+print(f"\nStock Data Visualizer")
+print("------------------------")
+
+def date_validation(date_str):
+    try:
+        return datetime.stritime(date_str, "%Y-%m-%d")
+    except ValueError:
+        return None
+    
+keep_going = True
+while keep_going:
+
+# Collect graph parameters
+
+    # Get symbol
+    symbol = input(f"\nEnter the stock symbol you are looking for: ").upper().strip()
+
+    # Validate symbol
+
+    # Get chart type
+    print(f"\nChart Types")
+    print("-----------")
+    print("1. Bar")
+    print("2. Line")
+    chartType = input("Enter the chart type you want (1, 2): ")
+    
+    # Validate chart type
+    while chartType not in ["1", "2"]:
+        chartType = input("Please enter 1 or 2 for chart type.")
+
+    # Get time series
+    print(f"\nSelect the time series of the chart you wish to generate")
+    print("--------------------------------------------------------")
+    print("1. Intraday")
+    print("2. Daily")
+    print("3. Weekly")
+    print("4. Monthly")
+    timeSeries = input("Enter the time series option (1, 2, 3, 4): ")
+     # Validate time series
+    while timeSeries not in ["1", "2", "3", "4"]:
+        timeSeries = input("Please enter 1, 2, 3, or 4 for the type of chart you want to generate.")
+
+    # Get start date
+    startDateStr = input(f"\nEnter the start date (YYYY-MM-DD): ")
+    startDate = date_validation(startDateStr)
+     # Validate start date
+    while not startDate:
+        startDateStr = input("Please enter the date in YYYY-MM-DD format.")
+        startDate = date_validation(startDateStr)
+
+    # Get end date
+    endDateStr = input(f"\nEnter the end date (YYYY-MM-DD): ")
+    endDate = date_validation(endDateStr)
+    # Validate end date
+    while not endDate or endDate < startDate:
+        if not endDate:
+            endDateStr = input("Please enter the date in YYYY-MM-DD format.")
+        else:
+            print("End date cannot be before start date.")
+            endDateStr = input("Enter the end date (YYYY-MM-DD): ")
+        endDate = date_validation(endDateStr)
+
+#Time series option functions
+    if timeSeries == "1":
+        alphaFunction = "TIME_SERIES_INTRADAY"
+        paramaters =  {"interval": "5min"}
+        timeSeriesKey = "Time Series: 5min"
+    elif timeSeries == "2":
+        alphaFunction = "TIME_SERIES_DAILY"
+        paramaters = {}
+        timeSeriesKey = "Time series: Daily"
+    elif timeSeries == "3":
+        alphaFunction = "TIME_SERIES_WEEKLY"
+        paramaters = {}
+        timeSeriesKey = "Weekly Time Series"
+    else:
+        alphaFunction = "TIME_SERIES_MONTHLY"
+        paramaters = {}
+        timeSeriesKey = "Monthly Time Series"
+
+# Call API to get data
+# AlphaVantage API Key:   H1514RX61K8J6SFK
+    apiKey = "H1514RX61K8J6SFK"
+    url = "https://www.alphavantage.co/query"
+    parameters = {"function": alphaFunction, "symbol": symbol, "apikey": apiKey}
+    paramaters.update(parameters)
+    print("\nGetting data from Alpha Vantage....")
+    response = requests.get(url, parameters=parameters)
+    if response.statusCode != 200:
+        print("Having troubles fetching data. Please try again.")
+        continue
+    data = response.json()
+    if "Error Message" in data or "Note" in data or timeSeriesKey not in data:
+        print("API Key Error:", data.get("Error Message", data.get("Note", "Data not available.")))
+        continue
+
+    timeSeries = data[timeSeriesKey]
+# Manipulate data
+    filteredDates = []
+    filteredPrices = []
+    for dateStr, daily in timeSeries.items():
+        try:
+            currentDate = datetime.strptime(dateStr[:10], "%y-%m-%d")
+        except:
+            continue
+        if startDate <= currentDate <= endDate:
+            filteredDates.append(currentDate)
+            filteredPrices.append(float(daily["4. close"]))
+    if not filteredDates:
+        print("There is no data for the dates you've selected.")
+        continue
+
+# Create graph
+    if chartType == "1":
+        chart = pygal.Bar()
+    else:
+        chart = pygal.Line()
+    chart.title = f"{symbol} Stock Data"
+    chart.xLabels = [d.strftime("%y-%m-%d") for d in filteredDates]
+    chart.add("Closing Price", filteredPrices)
+
+# Write HTML wrapper for graph
+    
+# Launch HTML in default browser.
+
+# Ask to go again
+go = input(f"\nWould you like to view more stock data? Press 'y' to continue: ")
+if go.lower() != "y":
+        keep_going = False
+
+print(f"\nGoodbye")
+exit()
