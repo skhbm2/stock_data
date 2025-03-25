@@ -1,4 +1,5 @@
 import pygal
+import csv
 import requests
 import lxml
 ##INFO TECH 4430 - Software Engineering
@@ -21,11 +22,15 @@ while keep_going:
 # Collect graph parameters
 
     # Get symbol
-    symbolBool = True
     symbol = ""
+    symbolBool = True
     while symbolBool:
         symbol = input(f"\nEnter the stock symbol you are looking for: ")
-        r = requests.get('https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords={symbol}&apikey=H1514RX61K8J6SFK')
+        symbol = symbol.upper()
+        if symbol.isalpha() and len(symbol) <= 5:
+            symbolBool = False
+        else:
+            print("\nYour Symbol doesn't exist")
 
 
     # Validate symbol
@@ -147,7 +152,7 @@ while keep_going:
 
     # Validate end date
 
-    url = "https://alphavantageapi.co/timeseries/analytics?SYMBOLS={symbol}&RANGE={startDate}&RANGE={endDate}&INTERVAL=DAILY&OHLC=close&CALCULATIONS=MEAN,STDDEV,CORRELATION&apikey=demo"
+    url = f"https://alphavantageapi.co/timeseries/analytics?SYMBOLS={symbol}&RANGE={startDate}&RANGE={endDate}&INTERVAL=DAILY&OHLC=close&CALCULATIONS=MEAN,STDDEV,CORRELATION&apikey=H1514RX61K8J6SFK"
 
 
 # Call API to get data
