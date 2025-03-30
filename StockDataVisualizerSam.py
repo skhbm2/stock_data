@@ -152,7 +152,7 @@ while keep_going:
 
     # Validate end date
 
-    url = f"https://alphavantageapi.co/timeseries/analytics?SYMBOLS={symbol}&RANGE={startDate}&RANGE={endDate}&INTERVAL=DAILY&OHLC=close&CALCULATIONS=MEAN,STDDEV,CORRELATION&apikey=H1514RX61K8J6SFK"
+    url = f"https://alphavantageapi.co/timeseries/analytics?SYMBOLS={symbol}&RANGE={startDate}&RANGE={endDate}&INTERVAL={dateType}&OHLC=close&CALCULATIONS=MEAN,STDDEV,CORRELATION&apikey=H1514RX61K8J6SFK"
 
 
 # Call API to get data
