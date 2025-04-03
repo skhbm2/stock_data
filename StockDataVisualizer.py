@@ -17,10 +17,11 @@ import pandas
 print(f"\nStock Data Visualizer")
 print("------------------------")
 api_key = "H1514RX61K8J6SFK"
+api_key2 = "NGQOGVZY1A9CYDLK"
 symbol = "GOOGL"
 function = "TIME_SERIES_DAILY"
 #url = f"https://www.alphavantage.co/query?function={function}&symbol={symbol}&outputsize=full&apikey={api_key}"
-url = f"https://www.alphavantage.co/query?function={function}&symbol={symbol}&apikey={api_key}"
+url = f"https://www.alphavantage.co/query?function={function}&symbol={symbol}&apikey={api_key2}"
 
 response = requests.get(url)
 data = response.json()
@@ -65,7 +66,6 @@ line_chart.render_to_file('chart.svg')                          # Save the svg t
 from datetime import datetime, timedelta
 date_chart = pygal.Line(x_label_rotation=20)
 date_chart.x_labels = map(lambda d: d.strftime('%Y-%m-%d'), [
- "2025-03-20",
  datetime(2025, 3, 21),
  datetime(2025, 3, 24),
  datetime(2025, 3, 25),
