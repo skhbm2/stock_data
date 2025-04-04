@@ -1,6 +1,7 @@
 import pygal
 import csv
 import requests
+from io import StringIO
 import lxml
 ##INFO TECH 4430 - Software Engineering
 #Project 3 - Stock Data Visualization
@@ -44,7 +45,7 @@ while keep_going:
         print("1. Bar")
         print("2. Line")
         chartType = input("Enter the chart type you want (1, 2): ")
-        if chartType == 1 or chartType == 2:
+        if int(chartType) == 1 or int(chartType) == 2:
             chartBool = False
         else:
             print("Please enter 1 or 2")
@@ -62,18 +63,10 @@ while keep_going:
         print("3. Weekly")
         print("4. Monthly")
         dateType = input("Enter the time series option (1, 2, 3, 4): ")
-        if dateType == 1 or dateType == 2 or dateType == 3 or dateType == 4:
+        if int(dateType) == 1 or int(dateType) == 2 or int(dateType) == 3 or int(dateType) == 4:
             dateTypeBool = False
         else:
             print("Please Enter 1, 2, 3, or 4")
-    if dateType == 1:
-        dateType = "60min"
-    if dateType == 2:
-        dateType = "DAILY"
-    if dateType == 3:
-        dateType = "WEEKLY"
-    if dateType == 4:
-        dateType = "MONTHLY"
 
     # Validate chart type
 
@@ -119,9 +112,9 @@ while keep_going:
         y = tempDate.split("-")
         # Checking to make sure the year and month in valid
         if int(y[0]) >= 2000 and int(y[0]) <= 2025 and int(y[1]) >= 1 and int(y[1]) <= 12:
-            if int(y[0]) <= int(x[0]):
-                if int(y[1]) <= int(x[1]):
-                    if int(y[2]) < int(x[2]):
+            if int(y[0]) == int(x[0]):
+                if int(y[1]) == int(x[1]):
+                    if int(y[2]) >= int(x[2]):
                         # Checking leap year Febuary
                         if int(y[0]) % 4 == 0 and int(y[1]) == 2 and int(y[2]) >= 1 and int(y[1]) <= 29:
                             endDate = tempDate
@@ -142,8 +135,14 @@ while keep_going:
                             print("\nPlease Enter a Valid Date")
                     else:
                         print("\nPlease Enter a Valid Date")
+                elif int(y[1]) > int(x[1]):
+                    endDate = tempDate
+                    tempDateBool = False
                 else:
                     print("\nPlease Enter a Valid Date")
+            elif int(y[0]) > int(x[0]):
+                endDate = tempDate
+                tempDateBool = False
             else:
                 print("\nPlease Enter a Valid Date")
         else:
@@ -152,19 +151,84 @@ while keep_going:
 
     # Validate end date
 
-    url = f"https://alphavantageapi.co/timeseries/analytics?SYMBOLS={symbol}&RANGE={startDate}&RANGE={endDate}&INTERVAL={dateType}&OHLC=close&CALCULATIONS=MEAN,STDDEV,CORRELATION&apikey=H1514RX61K8J6SFK"
-
+    url = f""
+    if dateType == 1:
+        url = f"https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol={symbol}&interval=60min&outputsize=full&apikey=H1514RX61K8J6SFK&datatype=csv"
+    elif dateType == 2:
+        url = f"https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol={symbol}&outputsize=full&apikey=H1514RX61K8J6SFK&datatype=csv"
+    elif dateType == 3:
+        url = f"https://www.alphavantage.co/query?function=TIME_SERIES_WEEKLY&symbol={symbol}&apikey=H1514RX61K8J6SFK&datatype=csv"
+    else:
+        url = f"https://www.alphavantage.co/query?function=TIME_SERIES_MONTHLY&symbol={symbol}&apikey=H1514RX61K8J6SFK&datatype=csv"
 
 # Call API to get data
 # AlphaVantage API Key:   H1514RX61K8J6SFK
+    dates = []
+    open = []
+    high = []
+    low = []
+    close = []
+    startFound = False
+    noEndFound = True
+    firstLineGone = 0
+    aquireData = requests.get(url)
+    stockData = csv.reader(aquireData.text.strip().split("\n"))
+    for row in stockData:
+        print(row)
+        if firstLineGone > 0:    
+            temp = str(row[0]).split('-')
+            print(temp)
+            if not startFound:
+                if int(temp[0]) == int(x[0]) and int(temp[1]) == int(x[1]) and int(temp[2]) <= int(x[2]):
+                    startFound = True
+                    dates.append(float(row[0]))
+                    open.append(float(row[1]))
+                    high.append(float(row[2]))
+                    low.append(float(row[3]))
+                    close.append(float(row[4]))
+            elif startFound and noEndFound:
+                if int(temp[0]) == int(y[0]) and int(temp[1]) == int(y[1]) and int(temp[2]) == int(y[2]):
+                    noEndFound = False
+                    dates.append(float(row[0]))
+                    open.append(float(row[1]))
+                    high.append(float(row[2]))
+                    low.append(float(row[3]))
+                    close.append(float(row[4]))
+                elif int(temp[0]) == int(y[0]) and int(temp[1]) == int(y[1]) and int(temp[2]) < int(y[2]):
+                    noEndFound = False
+                elif int(temp[0]) == int(y[0]) and int(temp[1]) == int(y[1])-1:
+                    noEndFound = False
+                elif int(temp[0]) == int(y[0])-1:
+                    noEndFound = False
+                else:
+                    dates.append(float(row[0]))
+                    open.append(float(row[1]))
+                    high.append(float(row[2]))
+                    low.append(float(row[3]))
+                    close.append(float(row[4]))
+        firstLineGone = firstLineGone + 1
 
+
+    dates.reverse()
+    open.reverse()
+    high.reverse()
+    low.reverse()
+    close.reverse()
+    for date in dates:
+        print(f"[{date}]")
 # Manipulate data
 
 # Create graph
-if chartType == 1:
-    line_chart = pygal.Line()
-elif chartType == 2:
-    bar_chart = pygal.Bar()
+    if chartType == 1:
+        line_chart = pygal.Line()
+        line_chart.title = f'{symbol} Stock Data'
+        line_chart.x_labels = map(str, range(2002, 2013))
+        line_chart.add('Open', )
+        line_chart.add('High', )
+        line_chart.add('Low', )
+        line_chart.add('Close', )
+    elif chartType == 2:
+        bar_chart = pygal.Bar()
 
 # Write HTML wrapper for graph
 
