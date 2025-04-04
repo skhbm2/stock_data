@@ -163,28 +163,70 @@ while keep_going:
 
 # Call API to get data
 # AlphaVantage API Key:   H1514RX61K8J6SFK
-    noStartFound = True
-    endFound = False
+    dates = []
+    open = []
+    high = []
+    low = []
+    close = []
+    startFound = False
+    noEndFound = True
+    firstLineGone = 0
     aquireData = requests.get(url)
     stockData = csv.reader(aquireData.text.strip().split("\n"))
     for row in stockData:
-        if row[0] == endDate:
-            endFound = True
-        if endFound and noStartFound:
-            print(row)
-        if row[0] == startDate:
-            noStartFoundFound = True
-        
+        print(row)
+        if firstLineGone > 0:    
+            temp = str(row[0]).split('-')
+            print(temp)
+            if not startFound:
+                if int(temp[0]) == int(x[0]) and int(temp[1]) == int(x[1]) and int(temp[2]) <= int(x[2]):
+                    startFound = True
+                    dates.append(float(row[0]))
+                    open.append(float(row[1]))
+                    high.append(float(row[2]))
+                    low.append(float(row[3]))
+                    close.append(float(row[4]))
+            elif startFound and noEndFound:
+                if int(temp[0]) == int(y[0]) and int(temp[1]) == int(y[1]) and int(temp[2]) == int(y[2]):
+                    noEndFound = False
+                    dates.append(float(row[0]))
+                    open.append(float(row[1]))
+                    high.append(float(row[2]))
+                    low.append(float(row[3]))
+                    close.append(float(row[4]))
+                elif int(temp[0]) == int(y[0]) and int(temp[1]) == int(y[1]) and int(temp[2]) < int(y[2]):
+                    noEndFound = False
+                elif int(temp[0]) == int(y[0]) and int(temp[1]) == int(y[1])-1:
+                    noEndFound = False
+                elif int(temp[0]) == int(y[0])-1:
+                    noEndFound = False
+                else:
+                    dates.append(float(row[0]))
+                    open.append(float(row[1]))
+                    high.append(float(row[2]))
+                    low.append(float(row[3]))
+                    close.append(float(row[4]))
+        firstLineGone = firstLineGone + 1
 
-        
 
-
-
+    dates.reverse()
+    open.reverse()
+    high.reverse()
+    low.reverse()
+    close.reverse()
+    for date in dates:
+        print(f"[{date}]")
 # Manipulate data
 
 # Create graph
     if chartType == 1:
         line_chart = pygal.Line()
+        line_chart.title = f'{symbol} Stock Data'
+        line_chart.x_labels = map(str, range(2002, 2013))
+        line_chart.add('Open', )
+        line_chart.add('High', )
+        line_chart.add('Low', )
+        line_chart.add('Close', )
     elif chartType == 2:
         bar_chart = pygal.Bar()
 
