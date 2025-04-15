@@ -6,6 +6,7 @@ import lxml
 from datetime import datetime 
 import webbrowser
 import os
+from dateutil import parser
 ##INFO TECH 4430 - Software Engineering
 #Project 3 - Stock Data Visualization
 #Scrum Team 2 - Sam Herrmann (Scrum Master), Zoey Benedict, Karson Null, Ken Kreidell
@@ -80,25 +81,31 @@ while keep_going:
     tempDateBool = True
     startDate = ""
     while tempDateBool:
-        tempDate = input(f"\nEarliest avalible date is 2000-01-01.\nEnter the start date (YYYY-MM-DD): ")
+        if dateType == 1:
+            tempDate = input(f"\nEarliest avalible date is 2000-01-01.\nEnter the start date (YYYY-MM-DD HH:MM:SS): ")
+        else:
+            tempDate = input(f"\nEarliest avalible date is 2000-01-01.\nEnter the start date (YYYY-MM-DD): ")
         # Splitting the dates into an array
-        x = tempDate.split("-")
+        try:
+            x = parser.parse(tempDate)
+        except ValueError:
+            continue
         # Checking to make sure the year and month in valid
-        if int(x[0]) >= 2000 and int(x[0]) <= 2025 and int(x[1]) >= 1 and int(x[1]) <= 12:
+        if x.year >= 2000 and x.year <= 2025 and x.month >= 1 and x.month <= 12:
             # Checking leap year Febuary
-            if int(x[0]) % 4 == 0 and int(x[1]) == 2 and int(x[2]) >= 1 and int(x[1]) <= 29:
+            if x.year % 4 == 0 and x.month == 2 and x.day >= 1 and x.day <= 29:
                 startDate = tempDate
                 tempDateBool = False
             # Checking Febuary
-            elif int(x[1]) == 2 and int(x[2]) >= 1 and int(x[2]) <= 28:
+            elif x.month == 2 and x.day >= 1 and x.day <= 28:
                 startDate = tempDate
                 tempDateBool = False
             # Checking 30 Day months
-            elif (int(x[1]) == 4 or int(x[1]) == 6 or int(x[1]) == 9 or int(x[1]) == 11) and int(x[2]) <= 30 and int(x[2]) >= 1:
+            elif (x.month == 4 or x.month == 6 or x.month == 9 or x.month == 11) and x.day <= 30 and x.day >= 1:
                 startDate = tempDate
                 tempDateBool = False
             # Checking 31 Day Months
-            elif (int(x[1]) == 1 or int(x[1]) == 2 or int(x[1]) == 3 or int(x[1]) == 5 or int(x[1]) == 7 or int(x[1]) == 8 or int(x[1]) == 10 or int(x[1]) == 12) and int(x[2]) <= 31 and int(x[2]) >= 1:
+            elif (x.month == 1 or x.month == 2 or x.month == 3 or x.month == 5 or x.month == 7 or x.month == 8 or x.month == 10 or x.month == 12) and x.day <= 31 and x.day >= 1:
                 startDate = tempDate
                 tempDateBool = False
             else:
@@ -113,40 +120,46 @@ while keep_going:
     tempDateBool = True
     endDate = ""
     while tempDateBool:
-        tempDate = input(f"\nEnter the end date (YYYY-MM-DD): ")
+        if dateType == 1:
+            tempDate = input(f"\nEnter the end date (YYYY-MM-DD HH:MM:SS): ")
+        else:
+            tempDate = input(f"\nEnter the end date (YYYY-MM-DD): ")
         # Splitting the dates into an array
-        y = tempDate.split("-")
+        try:
+            y = parser.parse(tempDate)
+        except ValueError:
+            continue
         # Checking to make sure the year and month in valid
-        if int(y[0]) >= 2000 and int(y[0]) <= 2025 and int(y[1]) >= 1 and int(y[1]) <= 12:
-            if int(y[0]) == int(x[0]):
-                if int(y[1]) == int(x[1]):
-                    if int(y[2]) >= int(x[2]):
+        if y.year >= 2000 and y.year <= 2025 and y.month >= 1 and y.month <= 12:
+            if y.year == x.year:
+                if y.month == x.month:
+                    if y.day >= x.day:
                         # Checking leap year Febuary
-                        if int(y[0]) % 4 == 0 and int(y[1]) == 2 and int(y[2]) >= 1 and int(y[1]) <= 29:
+                        if y.year % 4 == 0 and y.month == 2 and y.day >= 1 and y.day <= 29:
                             endDate = tempDate
                             tempDateBool = False
                         # Checking Febuary
-                        elif int(y[1]) == 2 and int(y[2]) >= 1 and int(y[2]) <= 28:
+                        elif y.month == 2 and y.day >= 1 and y.day <= 28:
                             endDate = tempDate
                             tempDateBool = False
                         # Checking 30 Day months
-                        elif (int(y[1]) == 4 or int(y[1]) == 6 or int(y[1]) == 9 or int(y[1]) == 11) and int(y[2]) <= 30 and int(y[2]) >= 1:
+                        elif (y.month == 4 or y.month == 6 or y.month == 9 or y.month == 11) and y.day <= 30 and y.day >= 1:
                             endDate = tempDate
                             tempDateBool = False
                         # Checking 31 Day Months
-                        elif (int(y[1]) == 1 or int(y[1]) == 2 or int(y[1]) == 3 or int(y[1]) == 5 or int(y[1]) == 7 or int(y[1]) == 8 or int(y[1]) == 10 or int(y[1]) == 12) and int(y[2]) <= 31 and int(y[2]) >= 1:
+                        elif (y.month == 1 or y.month == 2 or y.month == 3 or y.month == 5 or y.month == 7 or y.month == 8 or y.month == 10 or y.month == 12) and y.day <= 31 and y.day >= 1:
                             endDate = tempDate
                             tempDateBool = False
                         else:
                             print("\nPlease Enter a Valid Date")
                     else:
                         print("\nPlease Enter a Valid Date")
-                elif int(y[1]) > int(x[1]):
+                elif y.month > x.month:
                     endDate = tempDate
                     tempDateBool = False
                 else:
                     print("\nPlease Enter a Valid Date")
-            elif int(y[0]) > int(x[0]):
+            elif y.year > x.year:
                 endDate = tempDate
                 tempDateBool = False
             else:
@@ -179,18 +192,35 @@ while keep_going:
     firstLineGone = 0
     aquireData = requests.get(url)
     stockData = csv.reader(aquireData.text.strip().split("\n"))
-    strippedStartDate = datetime.strptime(startDate, "%Y-%m-%d")
-    strippedEndDate = datetime.strptime(endDate, "%Y-%m-%d")
+    #intraday requires a timestamp on the date format
+    if dateType == 1:
+        try:
+            strippedStartDate = datetime.strptime(startDate, "%Y-%m-%d %H:%M:%S")
+            strippedEndDate = datetime.strptime(endDate, "%Y-%m-%d %H:%M:%S")
+        except ValueError:
+            continue
+    else:
+        strippedStartDate = datetime.strptime(startDate, "%Y-%m-%d")
+        strippedEndDate = datetime.strptime(endDate, "%Y-%m-%d")
     next(stockData)
     for row in stockData:
         try:
-            current_dt = datetime.strptime(row[0], "%Y-%m-%d")
-            if strippedStartDate <= current_dt <= strippedEndDate:
-                dates.append(row[0])  
-                open_price.append(float(row[1]))
-                high_price.append(float(row[2]))
-                low_price.append(float(row[3]))
-                close_price.append(float(row[4]))
+            if dateType == 1:
+                current_dt = datetime.strptime(row[0], "%Y-%m-%d %H:%M:%S")
+                if strippedStartDate.date() <= current_dt.date() <= strippedEndDate.date():
+                    dates.append(row[0])  
+                    open_price.append(float(row[1]))
+                    high_price.append(float(row[2]))
+                    low_price.append(float(row[3]))
+                    close_price.append(float(row[4]))
+            else:  
+                current_dt = datetime.strptime(row[0], "%Y-%m-%d")
+                if strippedStartDate <= current_dt <= strippedEndDate:
+                    dates.append(row[0])  
+                    open_price.append(float(row[1]))
+                    high_price.append(float(row[2]))
+                    low_price.append(float(row[3]))
+                    close_price.append(float(row[4]))
         except ValueError:
                 continue
 
