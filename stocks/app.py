@@ -9,13 +9,22 @@ app = Flask(__name__)
 
 @app.route("/", methods=["GET", "POST"])
 def stock_visualizer():
+    stocks = ""
+    with open('stocks.csv', 'r') as read_obj: 
+        csv_reader = csv.reader(read_obj) 
+        stock_list = list(csv_reader) 
+        for sublist in stock_list:
+            stocks += f"<option value=\"{sublist[0]}\">{sublist[0]} - {sublist[1]} ({sublist[2]})</option>\r\n"
+
     chart_svg = ""
     error = ""
-    form_html = '''
+    form_html = f'''
         <h1>Stock Data Visualizer</h1>
         <form method="POST">
             <label>Stock Symbol:</label>
-            <input name="symbol" required><br><br>
+            <select name="symbol">
+            {stocks}
+            </select><br><br>
 
             <label>Chart Type:</label>
             <select name="chartType">
